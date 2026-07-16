@@ -9,6 +9,7 @@ import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 import { MailService } from 'src/mail/mail.service';
 import { EmailDto } from './dto/email.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Injectable()
 export class AuthService {
@@ -136,7 +137,7 @@ export class AuthService {
 
 
 
-        // verify otp
+        // generate verification otp
 
         async sendVerifyOtp(emailDto: EmailDto) {
             try {
@@ -198,4 +199,73 @@ export class AuthService {
             }
         }
 
-    }
+
+
+
+            // Check verify email
+
+            async verifyEmail(verifyEmailDto: VerifyEmailDto) {
+                try{
+                    const { email, otp } = verifyEmailDto;
+
+                    //find user by email
+                    const user = await this.userModel.findOne({email});
+
+                    if(!user) {
+                        return {
+                            success: false,
+                            message: "User not found"
+                        }
+                    }
+
+                    // check whether the account is already verified or nto
+
+                    if(user.isAccountVerified) {
+                        return {
+                            success: false,
+                            message: "Account already verified",
+                        }
+                    }
+
+                    //Compare the otp
+                    if(user.verifyOtp !== otp) {
+                        return {
+                            success: false,
+                            message: "Invalid OTP"
+                        }
+                    }
+
+                    //check otp expiry
+
+                    if(user.verifyOtpExpiredAt < Date.now()) {
+                        return {
+                            success: false,
+                            message: "OTP has expired"
+                        }
+                    }
+
+                    user.isAccountVerified = true;
+
+                    //clear otp after successful verification
+
+                    user.verifyOtp = "";
+                    user.verifyOtpExpiredAt = 0;
+
+                    user.save();
+
+                    return {
+                        success: true,
+                        message: "Email verified successfully",
+                    }
+
+                } catch(error: any) {
+                    return{
+                        success: false,
+                        message: "Internal Server Error",
+                        error: error.message
+                    }
+                }
+            }
+
+
+}
