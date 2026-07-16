@@ -73,7 +73,6 @@ export class AuthService {
     // Login
     async login(loginDto: LoginDto, response : Response) {
         try{
-
         const {email, password} = loginDto;
 
         const user = await this.userModel.findOne({email});
@@ -96,7 +95,8 @@ export class AuthService {
 
         const token = await this.jwtService.signAsync({
             id: user._id,
-            email: user.email
+            email: user.email,
+            role: user.role
         });
 
         response.cookie("token", token, {
