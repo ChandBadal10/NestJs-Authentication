@@ -8,10 +8,7 @@ import { Role } from "src/auth/enums/role.enum";
 
 
 
-
-
 @Injectable()
-
 export class AdminSeed implements OnModuleInit {
     constructor(
         @InjectModel(User.name)

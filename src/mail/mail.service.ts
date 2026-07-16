@@ -21,8 +21,6 @@ export class MailService {
   html: string,
 ) {
   try {
-
-
     await this.transporter.sendMail({
       from: process.env.SENDER_EMAIL,
       to,
