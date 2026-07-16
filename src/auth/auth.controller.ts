@@ -5,6 +5,7 @@ import { LoginDto } from "./dto/login.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import type { Response } from "express";
 import { EmailDto } from "./dto/email.dto";
+import { VerifyEmailDto } from "./dto/verify-email.dto";
 
 
 
@@ -54,5 +55,13 @@ export class AuthController {
         @Body() emailDto: EmailDto,
     ) {
         return this.authService.sendVerifyOtp(emailDto);
+    }
+
+
+    @Post("verify-email")
+    verifyEmail(
+        @Body() verifyEmailDto: VerifyEmailDto,
+    ) {
+        return this.authService.verifyEmail(verifyEmailDto)
     }
 }
