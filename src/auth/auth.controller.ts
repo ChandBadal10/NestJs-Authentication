@@ -6,6 +6,8 @@ import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import type { Response } from "express";
 import { EmailDto } from "./dto/email.dto";
 import { VerifyEmailDto } from "./dto/verify-email.dto";
+import { SendResetOtpDto } from "./dto/send-reset-otp.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 
 
@@ -63,5 +65,21 @@ export class AuthController {
         @Body() verifyEmailDto: VerifyEmailDto,
     ) {
         return this.authService.verifyEmail(verifyEmailDto)
+    }
+
+
+    @Post("send-reset-otp")
+    sendResetOtp(
+        @Body() sendResetOtpDto: SendResetOtpDto,
+    ) {
+        return this.authService.sendResetOtp(sendResetOtpDto)
+    }
+
+
+    @Post("reset-password")
+    resetPassword(
+        @Body() resetPasswordDto: ResetPasswordDto,
+    ) {
+        return this.authService.resetPassword(resetPasswordDto);
     }
 }

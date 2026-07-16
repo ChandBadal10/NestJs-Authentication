@@ -10,6 +10,8 @@ import { Response } from 'express';
 import { MailService } from 'src/mail/mail.service';
 import { EmailDto } from './dto/email.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { SendResetOtpDto } from './dto/send-reset-otp.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -137,7 +139,7 @@ export class AuthService {
 
 
 
-        // generate verification otp
+        // generate verification otp for verify email
 
         async sendVerifyOtp(emailDto: EmailDto) {
             try {
@@ -202,7 +204,7 @@ export class AuthService {
 
 
 
-            // Check verify email
+            // verify email by otp
 
             async verifyEmail(verifyEmailDto: VerifyEmailDto) {
                 try{
@@ -268,4 +270,116 @@ export class AuthService {
             }
 
 
+            // Send Reset Otp for password
+
+            async sendResetOtp(sendResetOtpDto: SendResetOtpDto) {
+                try {
+                    const { email } = sendResetOtpDto;
+
+                    const user = await this.userModel.findOne({email});
+
+                    if(!user) {
+                        return {
+                        success: false,
+                        message: "User is not found"
+                    }
+                     }
+
+                    if(!user.isAccountVerified) {
+                        return {
+                            success: false,
+                            message: "Please verify your email first",
+                        }
+                    }
+
+                    // generate otp
+
+                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+                    // Otp expires after 10 minutes
+
+                    user.resetOtp = otp;
+                    user.resetOtpExpiredAt = Date.now() + 10 * 60 * 1000;
+
+                    await user.save();
+
+                    await this.mailService.sendResetOtp(
+                        user.email,
+                        otp,
+                    )
+
+                    return {
+                        success: true,
+                        message: "Password reset OTP sent successfully",
+                    }
+
+
+                } catch (error: any) {
+                    return {
+                        success: false,
+                        message: "Internal Server Error",
+                        error: error.message,
+                    }
+                }
+            }
+
+
+            // Reset password
+            async resetPassword(resetPasswordDto: ResetPasswordDto) {
+                try {
+                    const {email, otp, newPassword} = resetPasswordDto;
+
+                    // Find User
+                    const user = await this.userModel.findOne({email});
+
+                    if(!user){
+                        return {
+                            success: false,
+                            message: "User not found"
+                        }
+                    }
+
+                    // Check OTP
+                    if(user.resetOtp !== otp) {
+                        return {
+                            success: false,
+                            message: "Invalid OTP"
+                        }
+                    }
+
+                    // Check OTP expiry
+                    if(user.resetOtpExpiredAt < Date.now()) {
+                        return {
+                            success: false,
+                            message: "OTP has expired"
+                        }
+                    }
+
+                    // Hash new password
+
+                    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+                    //Update password
+                    user.password = hashedPassword;
+
+                    // clear reset otp
+                    user.resetOtp = "";
+                    user.resetOtpExpiredAt = 0;
+
+                    //save user
+                    await user.save();
+
+                    return {
+                        success: true,
+                        message: "Password reset successfully"
+                    }
+                } catch (error: any) {
+                    return {
+                        success: false,
+                        message: "Internal Server Error",
+                        error: error.message
+                    }
+                }
+            }
 }
+
