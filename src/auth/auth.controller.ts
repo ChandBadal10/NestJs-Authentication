@@ -8,6 +8,9 @@ import { EmailDto } from "./dto/email.dto";
 import { VerifyEmailDto } from "./dto/verify-email.dto";
 import { SendResetOtpDto } from "./dto/send-reset-otp.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { RolesGuard } from "./guards/roles.guard";
+import { Role } from "./enums/role.enum";
+import { Roles } from "./decorators/roles.decorator";
 
 
 
@@ -81,5 +84,16 @@ export class AuthController {
         @Body() resetPasswordDto: ResetPasswordDto,
     ) {
         return this.authService.resetPassword(resetPasswordDto);
+    }
+
+
+    @Get("admin")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    adminOnly() {
+        return {
+            success: true,
+            message: "Welcome Admin!"
+        }
     }
 }
