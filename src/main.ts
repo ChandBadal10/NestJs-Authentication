@@ -18,6 +18,11 @@ async function bootstrap() {
     }),
   );
 
+  app.enableCors({
+  origin: "http://localhost:3001", // Next.js frontend
+  credentials: true,
+});
+
   await app.listen(process.env.PORT ?? 3000);
   console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
 }
