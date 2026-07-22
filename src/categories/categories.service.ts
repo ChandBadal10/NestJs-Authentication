@@ -5,6 +5,7 @@ import { Model, Types } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import slugify from 'slugify';
 import { GetCategoriesDto } from './dto/get-categories.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 
 
@@ -58,7 +59,9 @@ export class CategoriesService {
     sort,
   } = query;
 
-  const filter: any = {};
+  const filter: any = {
+  isActive: true,
+};
 
   if (search) {
     filter.name = {
@@ -98,7 +101,10 @@ export class CategoriesService {
       throw new BadRequestException("Invalid category id");
     }
 
-    const category = await this.categoryModel.findById(id);
+    const category = await this.categoryModel.findOne({
+  _id: id,
+  isActive: true,
+});
 
     if(!category) {
       throw new NotFoundException("Category not found");
@@ -112,6 +118,76 @@ export class CategoriesService {
   }
 
 
+  async updateCategory(id: string, updateCategoryDto: UpdateCategoryDto) {
 
+    // check ObjectId
+    if(!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException("Invalid category ID")
+    }
+
+    //Find Category
+    const category = await this.categoryModel.findById(id);
+
+    if(!category) {
+      throw new NotFoundException("Category not found")
+    }
+
+
+    // if name is changing
+
+    if(updateCategoryDto.name && updateCategoryDto.name !== category.name) {
+      const existingCategory = await this.findCategoryByName(UpdateCategoryDto.name);
+
+      if(existingCategory) {
+        throw new BadRequestException("Category already exists")
+      }
+
+      category.slug = slugify(updateCategoryDto.name, {
+        lower: true,
+        strict: true,
+        trim: true
+      })
+  }
+
+  //Update only provided fields
+
+  Object.assign(category, updateCategoryDto);
+
+  await category.save();
+
+  return {
+    success: true,
+    message: "Category updated successfully",
+    data: category
+  }
+  }
+
+
+  //Delete category
+
+  async deleteCategory(id: string) {
+    if(!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException("Invalid category id")
+    }
+
+    const category = await this.categoryModel.findById(id);
+
+    if(!category) {
+      throw new NotFoundException("Category not found")
+    }
+
+    if(!category.isActive) {
+      throw new BadRequestException("category is already deleted");
+    }
+
+    category.isActive = false;
+
+    await category.save();
+
+    return {
+      success: true,
+      message: "Category deleted successfully",
+    }
+  }
 
 }
