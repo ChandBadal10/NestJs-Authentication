@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
 import { Model, Types } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import slugify from 'slugify';
+import { GetCategoriesDto } from './dto/get-categories.dto';
 
 
 
@@ -47,6 +48,70 @@ export class CategoriesService {
             data: category,
         }
     }
+
+
+    async getAllCategories(query: GetCategoriesDto) {
+  const {
+    page,
+    limit,
+    search,
+    sort,
+  } = query;
+
+  const filter: any = {};
+
+  if (search) {
+    filter.name = {
+      $regex: search,
+      $options: 'i',
+    };
+  }
+
+  const skip = (page - 1) * limit;
+
+  const categories = await this.categoryModel
+    .find(filter)
+    .sort(sort ? { [sort]: 1 } : { createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+  const total =
+    await this.categoryModel.countDocuments(filter);
+
+  return {
+    success: true,
+    message: 'Categories fetched successfully',
+    data: categories,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+
+
+  async getCategoryById(id: string) {
+    if(!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException("Invalid category id");
+    }
+
+    const category = await this.categoryModel.findById(id);
+
+    if(!category) {
+      throw new NotFoundException("Category not found");
+    }
+
+    return {
+      success: true,
+      message: "Category fetched successfully",
+      data: category
+    }
+  }
+
+
 
 
 }
