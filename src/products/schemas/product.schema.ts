@@ -102,19 +102,19 @@ export class Product {
   @Prop({
     default: true,
   })
-  isPublished: boolean;
+  isPublished!: boolean;
 
   @Prop({
     default: true,
   })
-  isActive: boolean;
+  isActive!: boolean;
 
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
     required: true,
   })
-  createdBy: Types.ObjectId;
+  createdBy!: Types.ObjectId;
 
   @Prop({
     type: Types.ObjectId,
