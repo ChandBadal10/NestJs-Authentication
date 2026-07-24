@@ -8,6 +8,8 @@ import { SeedModule } from './seed/seed.module';
 import { AdminModule } from './admin/admin.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BrandsModule } from './brands/brands.module';
+import { ProductsModule } from './products/products.module';
+
 
 @Module({
   imports: [
@@ -29,7 +31,11 @@ import { BrandsModule } from './brands/brands.module';
 
     CategoriesModule,
 
-    BrandsModule
+    BrandsModule,
+
+    ProductsModule,
+
+
   ],
 })
 export class AppModule {}
