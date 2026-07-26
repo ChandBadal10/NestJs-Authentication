@@ -1,10 +1,11 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/enums/role.enum';
 import { CreateProductDto } from './dto/create-product.dto';
+import { GetProductsDto } from './dto/get-products.dto';
 
 
 
@@ -28,5 +29,13 @@ export class ProductsController {
             createProductDto,
             req.user.id,
         )
+    }
+
+
+    @Get()
+    async getAllProducts(
+        @Query() query: GetProductsDto,
+    ) {
+        return this.productsService.getAllProducts(query)
     }
 }
