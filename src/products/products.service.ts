@@ -8,6 +8,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import slugify from 'slugify';
 import { GetProductsDto } from './dto/get-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { StockDto } from './dto/stock.dto';
 
 
 
@@ -414,6 +415,29 @@ export class ProductsService {
             message: "Product restored successfully"
         }
     }
+
+
+    //Increase Stock
+
+    async increaseStock(
+  productId: string,
+  stockDto: StockDto,
+  userId: string,
+) {
+  const product = await this.validateProduct(productId);
+
+  product.stock += stockDto.quantity;
+
+  product.updatedBy = new Types.ObjectId(userId);
+
+  await product.save();
+
+  return {
+    success: true,
+    message: 'Stock updated successfully',
+    data: product,
+  };
+}
 
 
 }
