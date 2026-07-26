@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -38,4 +38,21 @@ export class ProductsController {
     ) {
         return this.productsService.getAllProducts(query)
     }
+
+
+    @Get('slug/:slug')
+    async getProductBySlug(
+    @Param('slug') slug: string,
+    ) {
+    return this.productsService.getProductBySlug(slug);
+    }
+
+    @Get(':id')
+    async getProductById(
+    @Param('id') id: string,
+    ) {
+    return this.productsService.getProductById(id);
+    }
+
+
 }
