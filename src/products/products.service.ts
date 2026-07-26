@@ -212,4 +212,52 @@ export class ProductsService {
     },
     }
 }
+
+
+    //Get product by id
+
+    async getProductById(id: string) {
+        const product = await this.productModel
+            .findById(id)
+            .populate("catrgory", "name slug")
+            .populate("brand", "name slug")
+            .populate("createdBy", "name email")
+
+    if(!product) {
+        throw new NotFoundException("Product not found");
+    }
+
+    return {
+        success: true,
+        message: "Product fetched successfully",
+        data: product
+    }
+    }
+
+
+
+    //Get product by slug
+    async getProductBySlug(slug: string) {
+    const product = await this.productModel
+    .findOne({
+      slug,
+      isActive: true,
+    })
+    .populate('category', 'name slug')
+    .populate('brand', 'name slug')
+    .populate('createdBy', 'name email');
+
+    if (!product) {
+    throw new NotFoundException('Product not found');
+    }
+
+    return {
+    success: true,
+    message: 'Product fetched successfully',
+    data: product,
+    };
+    }
+
+
+
 }
