@@ -69,6 +69,32 @@ export class ProductsService {
     }
 
 
+    async restoreProduct(
+  productId: string,
+  userId: string,
+) {
+  const product = await this.productModel.findById(productId);
+
+  if (!product) {
+    throw new NotFoundException('Product not found');
+  }
+
+  if (product.isActive) {
+    throw new BadRequestException('Product is already active');
+  }
+
+  product.isActive = true;
+  product.updatedBy = new Types.ObjectId(userId);
+
+  await product.save();
+
+  return {
+    success: true,
+    message: 'Product restored successfully',
+  };
+}
+
+
 
     async createProduct(createProductDto: CreateProductDto, userId: Types.ObjectId) {
         const  { name, description, price, discountPrice, stock, sku, category, brand, images, isFeatured, isPublished } = createProductDto;
@@ -293,13 +319,14 @@ export class ProductsService {
 
 
 
+    // Update profile
 
     async updateProduct(productId: string, updateProductDto: UpdateProductDto, userId: string) {
         const product = await this.validateProduct(productId);
 
         if (updateProductDto.category) {
-    await this.validateCategory(updateProductDto.category);
-  }
+        await this.validateCategory(updateProductDto.category);
+        }
 
   // Brand Validation
   if (updateProductDto.brand) {
@@ -360,6 +387,32 @@ export class ProductsService {
     message: 'Product updated successfully',
     data: updatedProduct,
   };
+    }
+
+
+
+    //Delete Product
+
+    async deleteProduct(productId: string, userId: string) {
+        const product = await this.productModel.findById(productId);
+
+        if(!product) {
+            throw new NotFoundException("Product not found")
+        }
+
+        if(!product.isActive) {
+            throw new BadRequestException("Product already deleted")
+        }
+
+        product.isActive = false;
+        product.updatedBy = new Types.ObjectId(userId);
+
+        await product.save();
+
+        return {
+            success: true,
+            message: "Product restored successfully"
+        }
     }
 
 
