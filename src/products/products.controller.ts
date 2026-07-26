@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -57,18 +57,49 @@ export class ProductsController {
 
 
     @Patch(':id')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-async updateProduct(
-  @Param('id') id: string,
-  @Body() updateProductDto: UpdateProductDto,
-  @Req() req: Request & { user: any },
-) {
-  return this.productsService.updateProduct(
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async updateProduct(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @Req() req: Request & { user: any },
+    ) {
+    return this.productsService.updateProduct(
     id,
     updateProductDto,
     req.user.id,
   );
+}
+
+
+    //delete product
+
+    @Delete(":id")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async deleteProduct(
+    @Param("id") id: string,
+    @Req() req: Request & { user: any },
+    ) {
+    return this.productsService.deleteProduct(
+        id,
+        req.user.id,
+    );
+}
+
+
+    //restore product
+    @Patch(":id/restore")
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+async restoreProduct(
+    @Param("id") id: string,
+    @Req() req: Request & { user: any },
+) {
+    return this.productsService.restoreProduct(
+        id,
+        req.user.id,
+    );
 }
 
 
