@@ -7,6 +7,7 @@ import { Role } from 'src/auth/enums/role.enum';
 import { CreateProductDto } from './dto/create-product.dto';
 import { GetProductsDto } from './dto/get-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { StockDto } from './dto/stock.dto';
 
 
 
@@ -90,17 +91,53 @@ export class ProductsController {
 
     //restore product
     @Patch(":id/restore")
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN)
-async restoreProduct(
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async restoreProduct(
     @Param("id") id: string,
     @Req() req: Request & { user: any },
-) {
+        ) {
     return this.productsService.restoreProduct(
         id,
         req.user.id,
     );
 }
+
+    //Increase product
+
+    @Patch(":id/increase-stock")
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    async increaseStock(
+    @Param('id') id: string,
+    @Body() stockDto: StockDto,
+    @Req() req: Request & { user: any },
+    ) {
+    return this.productsService.increaseStock(
+    id,
+    stockDto,
+    req.user.id,
+  );
+}
+
+
+//Decrease Product
+
+@Patch(':id/decrease-stock')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+async decreaseStock(
+  @Param('id') id: string,
+  @Body() stockDto: StockDto,
+  @Req() req: Request & { user: any },
+) {
+  return this.productsService.decreaseStock(
+    id,
+    stockDto,
+    req.user.id,
+  );
+}
+
 
 
 }

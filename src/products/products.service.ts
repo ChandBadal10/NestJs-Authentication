@@ -439,5 +439,27 @@ export class ProductsService {
   };
 }
 
+  //Decrease Stock
+
+  async decreaseStock(productId: string, stockDto: StockDto, userId: string) {
+    const product = await this.validateProduct(productId);
+
+    if(product.stock < stockDto.quantity) {
+      throw new BadRequestException("Insufficent stock")
+    }
+
+    product.stock -= stockDto.quantity;
+
+    product.updatedBy = new Types.ObjectId(userId);
+
+    await product.save();
+
+    return {
+      success: true,
+      message: "Stock updated successfully",
+      data: product
+    }
+  }
+
 
 }
